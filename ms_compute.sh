@@ -1,0 +1,30 @@
+rm Mutation_Score
+while read line
+do
+
+	echo $line > p2
+	./input.out < p2 > real_output
+
+	tm=0;
+	km=0;
+	echo $line >p1
+	tm=`ls mutant*.out | wc -l`
+	for i in mutant*.out
+	do
+		./$i < p1 > mfile
+		cmp mfile real_output > /dev/null
+		if test $? -ne 0
+		then
+		km=$((km=km+1)) 
+		fi
+	done
+	
+	echo "scale=5; $km * 100 / $tm" | bc >> Mutation_Score
+	echo -n "test_case  " >> all_score
+	echo -n $line $km $tm >> all_score
+	echo -n "    mutation score = " >> all_score
+	echo -n "  $line             $km              $tm            "
+	echo $(bc <<< "scale = 5; $km / $tm * 100")
+	echo "scale=5; $km * 100 / $tm" | bc >> all_score
+
+done < testcase_input 2> /dev/null
